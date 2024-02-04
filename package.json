@@ -1,0 +1,17 @@
+{
+  "name": "@dirty-matchbox/logger",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "^5.2.2",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "release-it": "^17.0.1"
+  },
+  "license": "MIT",
+  "private": true
+}
