@@ -4,7 +4,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build",
+    "prepare": "yarn run build",
     "release": "release-it"
   },
   "dependencies": {
