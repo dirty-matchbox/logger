@@ -1,18 +1,29 @@
-import {Logger as WinstonLogger, createLogger as createWinstonLogger} from "winston";
+import {
+  Logger as WinstonLogger,
+  createLogger as createWinstonLogger,
+} from "winston";
 import { LoggerConfig, LoggerFunction } from "./types";
 
 class Logger {
-  logger: WinstonLogger | undefined;
-  config: LoggerConfig | undefined;
-  errorLogger: WinstonLogger | undefined;
-  debugLogger: WinstonLogger | undefined;
-  warnLogger: WinstonLogger | undefined;
-  constructor({ config }: { config: {logger: LoggerConfig} }) {
+  logger: WinstonLogger | typeof console;
+  config: LoggerConfig;
+  errorLogger: WinstonLogger;
+  debugLogger: WinstonLogger;
+  warnLogger: WinstonLogger;
+  error: LoggerFunction;
+  log: LoggerFunction;
+  info: LoggerFunction;
+  warn: LoggerFunction;
+  constructor({ config }: { config: { logger: LoggerConfig } }) {
     this.config = config.logger;
     this.logger =
       this.config.environment === "development"
         ? this.createDebugLogger()
         : this.createLogger();
+    this.error = this.getLogger().error;
+    this.log = this.getLogger().log;
+    this.info = this.getLogger().info;
+    this.warn = this.getLogger().warn;
   }
   private createLogger() {
     return createWinstonLogger();
@@ -29,10 +40,6 @@ class Logger {
     }
     return this.logger;
   }
-  error: LoggerFunction = this.getLogger().error;
-  log: LoggerFunction = this.getLogger().log;
-  info: LoggerFunction = this.getLogger().info;
-  warn: LoggerFunction = this.getLogger().warn;
 }
 
 export default Logger;
