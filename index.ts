@@ -1,6 +1,8 @@
 import {
   Logger as WinstonLogger,
   createLogger as createWinstonLogger,
+  format,
+  transports,
 } from "winston";
 import { LoggerConfig, LoggerFunction } from "./types";
 
@@ -11,7 +13,7 @@ class Logger {
   debugLogger: WinstonLogger;
   warnLogger: WinstonLogger;
   error: LoggerFunction;
-  log: LoggerFunction;
+  debug: LoggerFunction;
   info: LoggerFunction;
   warn: LoggerFunction;
   constructor({ config }: { config: { logger: LoggerConfig } }) {
@@ -20,25 +22,39 @@ class Logger {
       this.config.environment === "development"
         ? this.createDebugLogger()
         : this.createLogger();
-    this.error = this.getLogger().error;
-    this.log = this.getLogger().log;
-    this.info = this.getLogger().info;
-    this.warn = this.getLogger().warn;
+    this.error = this.logger.error.bind(this.logger);
+    this.debug = this.logger.debug.bind(this.logger);
+    this.info = this.logger.info.bind(this.logger);
+    this.warn = this.logger.warn.bind(this.logger);
   }
   private createLogger() {
-    return createWinstonLogger();
+    return createWinstonLogger({
+      defaultMeta: {
+        name: this.config.name,
+      },
+      format: format.json(),
+    });
   }
   private createDebugLogger() {
     return createWinstonLogger({
       level: "debug",
+      defaultMeta: {
+        name: this.config.name,
+      },
+      format: format.json(),
+      transports: [
+        new transports.Console({
+          format: format.combine(
+            format.colorize(),
+            format.timestamp(),
+            format.printf(
+              ({ timestamp, level, message }) =>
+                `${timestamp} ${level}: ${message}`
+            )
+          ),
+        }),
+      ]
     });
-  }
-  private getLogger(): typeof console | WinstonLogger {
-    if (!this.logger) {
-      console.warn("Logger not initialized. Defaulting to standard console");
-      return console;
-    }
-    return this.logger;
   }
 }
 
