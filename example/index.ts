@@ -5,6 +5,7 @@ const debugConfig = {
   logger: {
     environment: (process.env.ENVIRONMENT as Environment) ?? "development",
     name: process.env.NAME ?? "debug-example-logger",
+    debug: true,
   },
 };
 
@@ -20,12 +21,25 @@ const debugLogger = new Logger({ config: debugConfig });
 const defaultLogger = new Logger({ config: defaultConfig });
 
 //  Debug
-debugLogger.warn("This is warning");
-debugLogger.error("This is error");
-debugLogger.info("This is info");
-debugLogger.debug("This is log");
+debugLogger.warn("Debug logger:", "This is warning", { some: "data" });
+debugLogger.error("Debug logger:", "This is error", new Error("Test error"));
+debugLogger.info(
+  "Debug logger:",
+  "This is info",
+  JSON.stringify({ foo: "bar", bar: { baz: 42 } }),
+);
+debugLogger.debug("Debug logger:", "This is debug", ["foo", 42]);
 
 //  Default
-defaultLogger.warn("This is warning");
-defaultLogger.error("This is error");
-defaultLogger.info("This is info");
+defaultLogger.warn("Default logger:", "This is warning", { some: "data" });
+defaultLogger.error(
+  "Default logger:",
+  "This is error",
+  new Error("Test error"),
+);
+defaultLogger.info(
+  "Default logger:",
+  "This is info",
+  JSON.stringify({ foo: "bar", bar: { baz: 42 } }),
+);
+defaultLogger.debug("Default logger:", "This is debug", ["foo", 42]);
