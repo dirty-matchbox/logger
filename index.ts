@@ -4,19 +4,12 @@ import {
   format,
   transports,
 } from "winston";
-import { LoggerConfig, LoggerFunction } from "./types";
+import { LoggerConfig } from "./types";
 
 class Logger {
-  logger: WinstonLogger | typeof console;
   config: LoggerConfig;
-  errorLogger: WinstonLogger;
+  logger: WinstonLogger | typeof console;
   debugLogger: WinstonLogger;
-  warnLogger: WinstonLogger;
-  error: LoggerFunction;
-  debug: LoggerFunction;
-  info: LoggerFunction;
-  warn: LoggerFunction;
-  log: LoggerFunction;
 
   constructor({ config }: { config: { logger: LoggerConfig } }) {
     this.config = config.logger;
@@ -24,11 +17,21 @@ class Logger {
       this.config.debug === true
         ? this.createDebugLogger()
         : this.createLogger();
-    this.error = this.logger.error.bind(this.logger);
-    this.debug = this.logger.debug.bind(this.logger);
-    this.info = this.logger.info.bind(this.logger);
-    this.warn = this.logger.warn.bind(this.logger);
-    this.log = this.logger.log.bind(this.logger);
+  }
+  private stringify(...args: any[]): string {
+    return args.map((a) => a).join(" ");
+  }
+  public warn( ...args: any[]) {
+    this.logger.warn(this.stringify(...args));
+  }
+  public error( ...args: any[]) {
+    this.logger.error(this.stringify(...args));
+  }
+  public info( ...args: any[]) {
+    this.logger.info(this.stringify(...args));
+  }
+  public debug( ...args: any[]) {
+    this.logger.debug(this.stringify(...args));
   }
   private createLogger() {
     return createWinstonLogger({
@@ -40,7 +43,9 @@ class Logger {
       transports: [
         new transports.Console({
           format: format.combine(
-            format.colorize(),
+            format.errors({ stack: true }),
+            format.splat(),
+
             format.timestamp(),
             format.printf(
               ({ timestamp, level, message }) =>
@@ -53,20 +58,20 @@ class Logger {
   }
   private createDebugLogger() {
     return createWinstonLogger({
-      level: "debug",
       defaultMeta: {
         name: this.config.name,
       },
-      format: format.json(),
       transports: [
         new transports.Console({
           format: format.combine(
+            format.errors({ stack: true }),
+            format.splat(),
+
             format.colorize(),
             format.timestamp(),
-            format.printf(
-              ({ timestamp, level, message }) =>
-                `${timestamp} ${level}: ${message}`,
-            ),
+            format.printf(({ timestamp, level, message }) => {
+              return `${timestamp} ${level}: ${message}`;
+            }),
           ),
         }),
       ],
